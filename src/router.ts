@@ -1,14 +1,17 @@
-import { Router } from 'express';
+import { NextFunction, Response, Router } from 'express';
 import { send } from './rabbit';
 import { OK } from 'http-status';
 
+import { RequestWithUserId, authMiddleware } from './middlewares/auth.middleware';
+
 export const router = Router();
 
-router.post('/message', (req, res, next) => {
+// router.use(authMiddleware);
+
+router.post('/message', async (req: RequestWithUserId, res: Response, next: NextFunction) => {
 	try {
 		const { content, meta } = req.body || {};
-		console.log(content, meta);
-		send({ content, meta });
+		send(req.body);
 		res.status(OK).send();
 	} catch (err) {
 		next(err);

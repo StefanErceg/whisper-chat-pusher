@@ -21,8 +21,8 @@ const connect = async () => {
 	}
 };
 
-const send = async ({ content, meta }: { content: any; meta: Record<string, string> }) => {
-	if (channel) channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify({ content, meta })));
+const send = async (message: any) => {
+	if (channel) channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
 };
 
 export { connect, send };
