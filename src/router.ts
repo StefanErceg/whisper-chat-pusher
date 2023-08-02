@@ -10,8 +10,8 @@ export const router = Router();
 
 router.post('/message', async (req: RequestWithUserId, res: Response, next: NextFunction) => {
 	try {
-		const { content, meta } = req.body || {};
-		send(req.body);
+		const { content, receiver, sender, meta } = req.body || {};
+		send({ content, receiver, sender, meta });
 		res.status(OK).send();
 	} catch (err) {
 		next(err);

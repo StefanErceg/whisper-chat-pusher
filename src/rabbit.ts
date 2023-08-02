@@ -3,26 +3,44 @@ import client, { Channel, Connection } from 'amqplib';
 
 dotenv.config();
 
-const LINK = process.env.RABBIT_LINK || '';
+const LINKS = process.env.RABBIT_LINKS || '';
 const QUEUE = process.env.RABBIT_QUEUE || 'messages';
 
-let channel: Channel | null = null;
+let channels: Channel[] = [];
+let currentIndex = 0;
 
-const connect = async () => {
+const connectQueue = async (link: string) => {
 	try {
-		const connection: Connection = await client.connect(LINK);
-		channel = await connection.createChannel();
+		const connection: Connection = await client.connect(link);
+		const channel = await connection.createChannel();
 
 		await channel.assertQueue(QUEUE);
 
-		console.log('Successfully connected to Rabbit queue!');
+		channels.push(channel);
+
+		console.log(`Successfully connected to RabbitMQ ${link}!`);
 	} catch (error) {
 		console.error(error);
 	}
 };
 
+const connect = () => {
+	const links = LINKS.split(',');
+	links.forEach((link) => connectQueue(link));
+};
+
 const send = async (message: any) => {
-	if (channel) channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
+	if (channels.length) {
+		let sent = false;
+		do {
+			try {
+				currentIndex = (currentIndex + 1) % channels.length;
+				sent = channels[currentIndex]?.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
+			} catch (error) {
+				console.error(error);
+			}
+		} while (!sent);
+	}
 };
 
 export { connect, send };
