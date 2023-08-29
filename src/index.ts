@@ -1,4 +1,6 @@
+import fs from 'fs';
 import cors from 'cors';
+import https from 'https';
 import dotenv from 'dotenv';
 import express from 'express';
 
@@ -17,9 +19,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(`/api/${version}`, router);
 
-app.listen(port, () => {
-	console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
-});
+https
+	.createServer(
+		{
+			key: fs.readFileSync('cert/key.pem'),
+			cert: fs.readFileSync('cert/cert.pem'),
+		},
+		app
+	)
+	.listen(port, () => {
+		console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
+	});
 
 //connect to RabbitMQs
 connect();
