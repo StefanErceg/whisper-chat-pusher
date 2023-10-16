@@ -10,6 +10,7 @@ import { connect } from './rabbit';
 dotenv.config();
 
 const app = express();
+const host = process.env.HOST;
 const port = process.env.PORT;
 const version = process.env.VERSION;
 
@@ -28,7 +29,7 @@ https
 		},
 		app
 	)
-	.listen(port, () => {
+	.listen({ host, port }, () => {
 		console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 	});
 
